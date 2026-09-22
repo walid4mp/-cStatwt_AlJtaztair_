@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+set -eu
+GRADLE_VERSION="8.14"
+DIST="gradle-${GRADLE_VERSION}-bin"
+BASE="${GRADLE_USER_HOME:-$HOME/.gradle}/wrapper/dists/${DIST}"
+ZIP="${BASE}/${DIST}.zip"
+DIR="${BASE}/${DIST}"
+if [ ! -x "${DIR}/bin/gradle" ]; then
+  mkdir -p "${BASE}"
+  if [ ! -f "${ZIP}" ]; then
+    curl -fsSL "https://services.gradle.org/distributions/${DIST}.zip" -o "${ZIP}"
+  fi
+  rm -rf "${DIR}.tmp"
+  mkdir -p "${DIR}.tmp"
+  unzip -q "${ZIP}" -d "${DIR}.tmp"
+  rm -rf "${DIR}"
+  mv "${DIR}.tmp/gradle-${GRADLE_VERSION}" "${DIR}"
+  rm -rf "${DIR}.tmp"
+fi
+exec "${DIR}/bin/gradle" "$@"

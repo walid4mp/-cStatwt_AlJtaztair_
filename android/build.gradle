@@ -1,0 +1,21 @@
+allprojects {
+    repositories { google(); mavenCentral() }
+}
+rootProject.buildDir = "../build"
+subprojects { project.buildDir = "${rootProject.buildDir}/${project.name}" }
+tasks.register("clean", Delete) { delete rootProject.buildDir }
+
+// Global JVM 17 compatibility for Android Java and Kotlin compilation.
+subprojects {
+    afterEvaluate { project ->
+        project.tasks.withType(JavaCompile).configureEach {
+            sourceCompatibility = JavaVersion.VERSION_17.toString()
+            targetCompatibility = JavaVersion.VERSION_17.toString()
+        }
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_17.toString()
+            }
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "sawt-aljazair-api",
+  "version": "1.5.6",
+  "private": true,
+  "scripts": {
+    "start": "node prisma/bootstrap.js && node src/server.js",
+    "dev": "node --watch src/server.js",
+    "prisma": "prisma",
+    "postinstall": "prisma generate",
+    "migrate:safe": "node prisma/safe-migrate.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.679.0",
+    "@prisma/client": "6.19.3",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "prisma": "6.19.3"
+  }
+}

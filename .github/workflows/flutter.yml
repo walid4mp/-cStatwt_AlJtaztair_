@@ -1,0 +1,29 @@
+name: Flutter Android
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - name: Resolve API URL
+        run: echo "API_URL=${API_URL:-https://cstatwt-aljtaztair.onrender.com}" >> "$GITHUB_ENV"
+        env:
+          API_URL: ${{ secrets.API_URL }}
+      - run: flutter build apk --release --dart-define=API_URL=$API_URL
+      - run: flutter build appbundle --release --dart-define=API_URL=$API_URL
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sawt-aljazair-v1.5.5-android
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
