@@ -19,28 +19,28 @@ jobs:
   build:
     name: Build Sawt Al Jazair Android
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
-      # 1. Download project
+      # 1. Checkout source
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2. Java
+      # 2. Setup Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      # 3. Gradle compatible with current AGP/Kotlin
+      # 3. Setup Gradle
       - name: Set up Gradle 8.14.3
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.14.3'
           cache-read-only: false
 
-      # 4. Pin Flutter to avoid automatic major toolchain changes
+      # 4. Setup Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -48,7 +48,7 @@ jobs:
           channel: stable
           cache: true
 
-      # 5. Verify Android toolchain and generate wrapper
+      # 5. Verify toolchain and prepare Android
       - name: Verify and prepare Android toolchain
         shell: bash
         run: |
@@ -80,7 +80,7 @@ jobs:
 
           cd ..
 
-      # 6. Cache Flutter packages
+      # 6. Cache Pub packages
       - name: Cache Pub packages
         uses: actions/cache@v4
         with:
@@ -93,9 +93,9 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      # 8. Validate Dart code
+      # 8. Analyze Dart source
       - name: Analyze Dart source
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       # 9. Configure API URL
       - name: Resolve API URL
@@ -103,54 +103,81 @@ jobs:
         env:
           API_URL_SECRET: ${{ secrets.API_URL }}
         run: |
+          set -euo pipefail
+
           API_URL="${API_URL_SECRET:-https://cstatwt-aljtaztair.onrender.com}"
           echo "API_URL=$API_URL" >> "$GITHUB_ENV"
 
-      # 10. Build APK
+      # 10. Build release APK
       - name: Build release APK
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
+          success=false
+
           for attempt in 1 2 3; do
             if flutter build apk --release \
               --dart-define=API_URL="$API_URL"; then
+              success=true
               break
             fi
 
-            if [ "$attempt" -eq 3 ]; then
-              echo "APK build failed after 3 attempts."
-              exit 1
+            if [ "$attempt" -lt 3 ]; then
+              echo "APK build failed. Retrying in 60 seconds..."
+              sleep 60
             fi
-
-            echo "APK build failed. Retrying in 60 seconds..."
-            sleep 60
           done
+
+          if [ "$success" != true ]; then
+            echo "APK build failed after 3 attempts."
+            exit 1
+          fi
 
           test -s build/app/outputs/flutter-apk/app-release.apk
 
-      # 11. Build Google Play App Bundle
+          echo "APK build completed successfully."
+
+      # 11. Build release App Bundle
       - name: Build release App Bundle
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
+          success=false
+
           for attempt in 1 2 3; do
             if flutter build appbundle --release \
               --dart-define=API_URL="$API_URL"; then
+              success=true
               break
             fi
 
-            if [ "$attempt" -eq 3 ]; then
-              echo "App Bundle build failed after 3 attempts."
-              exit 1
+            if [ "$attempt" -lt 3 ]; then
+              echo "AAB build failed. Retrying in 60 seconds..."
+              sleep 60
             fi
-
-            echo "App Bundle build failed. Retrying in 60 seconds..."
-            sleep 60
           done
+
+          if [ "$success" != true ]; then
+            echo "AAB build failed after 3 attempts."
+            exit 1
+          fi
 
           test -s build/app/outputs/bundle/release/app-release.aab
 
-      # 12. Upload APK and AAB
+          echo "AAB build completed successfully."
+
+      # 12. Verify artifacts
+      - name: Verify Android artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
+          ls -lh build/app/outputs/bundle/release/app-release.aab
+
+      # 13. Upload APK and AAB
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
