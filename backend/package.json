@@ -1,6 +1,6 @@
 {
   "name": "sawt-aljazair-api",
-  "version": "1.5.6",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "start": "node prisma/bootstrap.js && node src/server.js",
@@ -17,9 +17,13 @@
     "express": "5.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.16",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "prisma": "6.19.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

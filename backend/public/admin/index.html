@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sawt Aljazair Admin</title>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#14231b;--mut:#66756c;--line:#e1e7e3;--g:#0b7a3e;--r:#d32f2f;--b:#1565c0;--o:#ef6c00}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1512;--card:#17201b;--ink:#e8f0ea;--mut:#9aaba0;--line:#27332c}}
+:root[data-theme=dark]{--bg:#0f1512;--card:#17201b;--ink:#e8f0ea;--mut:#9aaba0;--line:#27332c}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{background:var(--g);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:700}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn.red{background:var(--r)}.btn.sm{padding:4px 10px;font-size:13px}
+input,select,textarea{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+textarea{min-height:90px}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--g);color:#fff;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;flex:1}header select{width:auto;background:#fff2;color:#fff;border-color:#fff4}header option{color:#000}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line)}
+nav button{white-space:nowrap;background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 14px;cursor:pointer}
+nav button.on{background:var(--g);color:#fff;border-color:var(--g)}
+main{padding:14px;max-width:1200px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.kpi b{display:block;font-size:26px}.kpi span{color:var(--mut);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.row>*{flex:0 1 auto}.row input,.row select{width:auto;min-width:140px;flex:1}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top;font-size:14px}th{color:var(--mut);font-weight:600}
+tr.click{cursor:pointer}tr.click:hover{background:#0b7a3e12}
+.chip{display:inline-block;padding:1px 9px;border-radius:12px;font-size:12px;font-weight:700;background:#0b7a3e1f;color:var(--g)}
+.chip.PENDING,.chip.OPEN{background:#ef6c0022;color:var(--o)}.chip.REJECTED,.chip.banned{background:#d32f2f22;color:var(--r)}.chip.REVIEWED{background:#1565c022;color:var(--b)}
+.bar{display:flex;align-items:center;gap:8px;margin:5px 0}.bar i{display:block;height:10px;background:var(--g);border-radius:6px}.bar span{min-width:90px;font-size:13px}
+.spark{display:flex;align-items:flex-end;gap:2px;height:50px}.spark i{flex:1;background:var(--g);border-radius:3px;min-height:2px}
+.modal{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;z-index:20;padding:12px}
+.modal>div{background:var(--card);border-radius:16px;padding:18px;max-width:560px;width:100%;max-height:92vh;overflow:auto}
+#toast{position:fixed;bottom:16px;inset-inline:16px;max-width:420px;margin-inline:auto;background:#222;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:30}
+#toast.err{background:var(--r)}
+.login{max-width:360px;margin:12vh auto;padding:0 16px}.login .card>*{margin-bottom:10px}
+label{display:block;font-weight:600;margin:8px 0 4px}.sw{display:flex;align-items:center;gap:10px;margin:10px 0}.sw input{width:auto}
+.mut{color:var(--mut);font-size:13px}.acts{display:flex;gap:6px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="app"></div><div id="toast"></div>
+<script>
+"use strict";
+const T={
+ar:{title:"لوحة إدارة صوت الجزائر",login:"تسجيل الدخول",id:"البريد أو اسم المستخدم",pw:"كلمة المرور",logout:"خروج",denied:"هذا الحساب ليس من الإدارة",dash:"المؤشرات",reports:"البلاغات",users:"المستخدمون",ver:"التوثيق",flags:"الشكاوى",posts:"المنشورات",bc:"بث الإشعارات",set:"الإعدادات",audit:"السجل",all:"الكل",search:"بحث",more:"تحميل المزيد",none:"لا توجد بيانات",save:"حفظ",saved:"تم الحفظ",close:"إغلاق",export:"تصدير CSV",status:"الحالة",note:"ملاحظة المشرف",apply:"تطبيق",ban:"حظر",unban:"رفع الحظر",verify:"توثيق",unverify:"إلغاء التوثيق",role:"الصلاحية",reset:"إعادة كلمة المرور",temp:"كلمة المرور المؤقتة",del:"حذف",confirm:"هل أنت متأكد؟",approve:"قبول",reject:"رفض",hide:"إخفاء",unhide:"إظهار",resolve:"معالجة",dismiss:"تجاهل",open:"مفتوحة",resolved:"معالجة",dismissed:"متجاهلة",send:"إرسال",aud:"الجمهور",audALL:"الجميع",audWILAYA:"ولاية",audUSER:"مستخدم",audSTAFF:"الإدارة",wilaya:"الولاية",userid:"اسم المستخدم أو المعرّف",ttl:"العنوان",msg:"الرسالة",sent:"تم الإرسال إلى",hist:"السجل",req:"مراجعة البلاغات قبل النشر",reg:"فتح التسجيل",anon:"السماح بالبلاغات المجهولة",maint:"وضع الصيانة",ann:"إعلان التطبيق",lvl:"مستوى الإعلان",minv:"أدنى إصدار",name:"الاسم",email:"البريد",date:"التاريخ",type:"النوع",by:"بواسطة",desc:"الوصف",banned:"محظور",verified:"موثّق",reason:"السبب",hidden:"مخفي",action:"الإجراء",actor:"المنفذ",detail:"التفاصيل",users7:"مستخدمون",rep7:"بلاغات",pend:"قيد المراجعة",flg:"شكاوى مفتوحة",pv:"توثيق معلّق",byst:"حسب الحالة",topw:"أكثر الولايات",act:"آخر 14 يومًا",lang:"اللغة",hideT:"إخفاء المحتوى",delT:"حذف المحتوى",PENDING:"قيد المراجعة",REVIEWED:"تمت المراجعة",VERIFIED:"مؤكد",RESOLVED:"تم الحل",REJECTED:"مرفوض",APPROVED:"مقبول",USER:"مستخدم",MODERATOR:"مشرف",ADMIN:"مدير",info:"معلومة",warning:"تحذير",danger:"عاجل"},
+fr:{title:"Admin Voix d'Algérie",login:"Connexion",id:"E-mail ou pseudo",pw:"Mot de passe",logout:"Quitter",denied:"Ce compte n'est pas staff",dash:"Tableau",reports:"Rapports",users:"Utilisateurs",ver:"Vérification",flags:"Signalements",posts:"Publications",bc:"Diffusion",set:"Paramètres",audit:"Journal",all:"Tous",search:"Rechercher",more:"Charger plus",none:"Aucune donnée",save:"Enregistrer",saved:"Enregistré",close:"Fermer",export:"Exporter CSV",status:"Statut",note:"Note du modérateur",apply:"Appliquer",ban:"Bannir",unban:"Débannir",verify:"Vérifier",unverify:"Retirer vérif.",role:"Rôle",reset:"Réinit. mot de passe",temp:"Mot de passe temporaire",del:"Supprimer",confirm:"Confirmer ?",approve:"Approuver",reject:"Refuser",hide:"Masquer",unhide:"Afficher",resolve:"Traiter",dismiss:"Ignorer",open:"Ouverts",resolved:"Traités",dismissed:"Ignorés",send:"Envoyer",aud:"Audience",audALL:"Tous",audWILAYA:"Wilaya",audUSER:"Utilisateur",audSTAFF:"Équipe",wilaya:"Wilaya",userid:"Pseudo ou ID",ttl:"Titre",msg:"Message",sent:"Envoyé à",hist:"Historique",req:"Valider les rapports avant publication",reg:"Inscriptions ouvertes",anon:"Rapports anonymes autorisés",maint:"Mode maintenance",ann:"Annonce",lvl:"Niveau",minv:"Version minimale",name:"Nom",email:"E-mail",date:"Date",type:"Type",by:"Par",desc:"Description",banned:"Banni",verified:"Vérifié",reason:"Motif",hidden:"Masqué",action:"Action",actor:"Auteur",detail:"Détail",users7:"Utilisateurs",rep7:"Rapports",pend:"En attente",flg:"Signalements ouverts",pv:"Vérifs en attente",byst:"Par statut",topw:"Top wilayas",act:"14 derniers jours",lang:"Langue",hideT:"Masquer le contenu",delT:"Supprimer le contenu",PENDING:"En attente",REVIEWED:"Examiné",VERIFIED:"Vérifié",RESOLVED:"Résolu",REJECTED:"Rejeté",APPROVED:"Approuvé",USER:"Utilisateur",MODERATOR:"Modérateur",ADMIN:"Admin",info:"Info",warning:"Avertissement",danger:"Urgent"},
+en:{title:"Sawt Aljazair Admin",login:"Sign in",id:"Email or username",pw:"Password",logout:"Sign out",denied:"This account is not staff",dash:"Dashboard",reports:"Reports",users:"Users",ver:"Verification",flags:"Flags",posts:"Posts",bc:"Broadcast",set:"Settings",audit:"Audit",all:"All",search:"Search",more:"Load more",none:"No data",save:"Save",saved:"Saved",close:"Close",export:"Export CSV",status:"Status",note:"Moderator note",apply:"Apply",ban:"Ban",unban:"Unban",verify:"Verify",unverify:"Unverify",role:"Role",reset:"Reset password",temp:"Temporary password",del:"Delete",confirm:"Are you sure?",approve:"Approve",reject:"Reject",hide:"Hide",unhide:"Unhide",resolve:"Resolve",dismiss:"Dismiss",open:"Open",resolved:"Resolved",dismissed:"Dismissed",send:"Send",aud:"Audience",audALL:"Everyone",audWILAYA:"Wilaya",audUSER:"One user",audSTAFF:"Staff",wilaya:"Wilaya",userid:"Username or ID",ttl:"Title",msg:"Message",sent:"Sent to",hist:"History",req:"Review reports before publishing",reg:"Registration open",anon:"Allow anonymous reports",maint:"Maintenance mode",ann:"Announcement",lvl:"Level",minv:"Minimum version",name:"Name",email:"Email",date:"Date",type:"Type",by:"By",desc:"Description",banned:"Banned",verified:"Verified",reason:"Reason",hidden:"Hidden",action:"Action",actor:"Actor",detail:"Detail",users7:"Users",rep7:"Reports",pend:"Pending",flg:"Open flags",pv:"Pending verifications",byst:"By status",topw:"Top wilayas",act:"Last 14 days",lang:"Language",hideT:"Hide content",delT:"Delete content",PENDING:"Pending",REVIEWED:"Reviewed",VERIFIED:"Verified",RESOLVED:"Resolved",REJECTED:"Rejected",APPROVED:"Approved",USER:"User",MODERATOR:"Moderator",ADMIN:"Admin",info:"Info",warning:"Warning",danger:"Urgent"}};
+const ST=["PENDING","REVIEWED","VERIFIED","RESOLVED","REJECTED"];
+let lang=ls("lang")||"ar",token=ls("token"),me=null,tab="dash";
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+const t=k=>(T[lang]&&T[lang][k])||T.en[k]||k;
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=s=>document.querySelector(s);
+const isAdmin=()=>me&&me.role==="ADMIN";
+function toast(m,err){const e=$("#toast");e.textContent=m;e.className=err?"err":"";e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",3500)}
+async function api(path,opt={}){
+  const h={"Authorization":"Bearer "+token};let body;
+  if(opt.body){h["Content-Type"]="application/json";body=JSON.stringify(opt.body)}
+  let r;try{r=await fetch(path,{method:opt.method||"GET",headers:h,body})}catch(e){throw new Error("Network error")}
+  if(r.status===401){logout();throw new Error("401")}
+  if(opt.raw){if(!r.ok)throw new Error("HTTP "+r.status);return r}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||j.message||("HTTP "+r.status));
+  return j}
+const run=async f=>{try{await f()}catch(e){if(e.message!=="401")toast(e.message,true)}};
+function logout(){token=null;ls("token",null);me=null;render()}
+function setLang(l){lang=l;ls("lang",l);render()}
+function shell(inner){
+  return `<header><h1>${t("title")}</h1><select id="lg">${["ar","fr","en"].map(l=>`<option value="${l}"${l===lang?" selected":""}>${{ar:"العربية",fr:"Français",en:"English"}[l]}</option>`).join("")}</select>${me?`<button class="btn sec sm" id="lo" style="color:#fff;border-color:#fff6">${t("logout")}</button>`:""}</header>${inner}`}
+function bind(){const lg=$("#lg");if(lg)lg.onchange=e=>setLang(e.target.value);const lo=$("#lo");if(lo)lo.onclick=logout}
+function render(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  if(!token||!me){
+    $("#app").innerHTML=shell(`<div class="login"><div class="card"><h2 style="margin:0">${t("login")}</h2><input id="u" placeholder="${t("id")}" autocomplete="username"><input id="p" type="password" placeholder="${t("pw")}" autocomplete="current-password"><button class="btn" id="go" style="width:100%">${t("login")}</button></div></div>`);bind();
+    const go=async()=>run(async()=>{const r=await fetch("/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("#u").value,password:$("#p").value})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Error");if(!["ADMIN","MODERATOR"].includes(j.user.role))throw new Error(t("denied"));token=j.token;ls("token",token);me=j.user;render()});
+    $("#go").onclick=go;$("#p").onkeydown=e=>{if(e.key==="Enter")go()};
+    if(token&&!me)run(async()=>{const j=await api("/me");const u=j.user||j;if(!["ADMIN","MODERATOR"].includes(u.role))throw new Error(t("denied"));me=u;render()}).then(()=>{if(!me){token=null}});
+    return}
+  const tabs=[["dash"],["reports"],["users"],["ver"],["flags"],["posts"],...(isAdmin()?[["bc"],["set"]]:[]),["audit"]];
+  $("#app").innerHTML=shell(`<nav>${tabs.map(x=>`<button data-t="${x[0]}" class="${tab===x[0]?"on":""}">${t(x[0])}</button>`).join("")}</nav><main id="main"></main>`);bind();
+  document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+  run(()=>views[tab]($("#main")))}
+function modal(html){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div>${html}<div class="row" style="margin-top:12px"><button class="btn sec" data-x>${t("close")}</button></div></div>`;m.onclick=e=>{if(e.target===m||e.target.dataset.x!==undefined)m.remove()};document.body.appendChild(m);return m}
+const fd=d=>d?new Date(d).toLocaleString(lang==="ar"?"ar-DZ":lang):"";
+const chip=s=>`<span class="chip ${esc(s)}">${esc(t(s)===s?s:t(s))}</span>`;
+const sel=(id,opts,cur)=>`<select id="${id}">${opts.map(o=>`<option value="${esc(o[0])}"${o[0]===cur?" selected":""}>${esc(o[1])}</option>`).join("")}</select>`;
+function table(cols,rows,onClick){
+  if(!rows.length)return `<div class="card mut">${t("none")}</div>`;
+  const w=document.createElement("div");w.className="card tw";
+  w.innerHTML=`<table><thead><tr>${cols.map(c=>`<th>${esc(c[0])}</th>`).join("")}</tr></thead><tbody>${rows.map((r,i)=>`<tr class="${onClick?"click":""}" data-i="${i}">${cols.map(c=>`<td>${c[1](r)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  if(onClick)w.querySelectorAll("tr[data-i]").forEach(tr=>tr.onclick=e=>{if(e.target.closest("button"))return;onClick(rows[+tr.dataset.i])});
+  return w}
+function paged(el,path,build){
+  let rows=[],done=false;const box=document.createElement("div");el.appendChild(box);
+  const load=()=>run(async()=>{const sep=path.includes("?")?"&":"?";const q=rows.length?sep+"before="+encodeURIComponent(rows[rows.length-1].createdAt):"";const got=await api(path+q);rows=rows.concat(got);done=got.length<30;draw()});
+  const draw=()=>{box.innerHTML="";build(box,rows,()=>{rows=[];load()});if(!done&&rows.length){const b=document.createElement("button");b.className="btn sec";b.textContent=t("more");b.onclick=load;box.appendChild(b)}};
+  load();return()=>{rows=[];load()}}
+const views={};
+views.dash=async el=>{
+  const s=await api("/admin/stats");
+  const k=(n,l)=>`<div class="card kpi"><b>${n}</b><span>${esc(l)}</span></div>`;
+  const bars=(o,max,fmt)=>Object.entries(o).map(([a,b])=>`<div class="bar"><span>${esc(fmt?fmt(a):a)}</span><i style="width:${max?Math.max(2,b/max*100):0}%"></i><b>${b}</b></div>`).join("");
+  const spark=(rows,l)=>{const m=Math.max(1,...rows.map(r=>r.count));return `<div><div class="row"><b style="flex:1">${esc(l)}</b><span class="mut">${rows.reduce((a,r)=>a+r.count,0)}</span></div><div class="spark">${rows.map(r=>`<i title="${esc(r.date)}: ${r.count}" style="height:${Math.max(4,r.count/m*100)}%"></i>`).join("")}</div></div>`};
+  el.innerHTML=`<div class="grid">${k(s.users,t("users")+" (+"+s.newUsers7+")")}${k(s.reports,t("reports")+" (+"+s.newReports7+")")}${k(s.pendingReports,t("pend"))}${k(s.posts,t("posts"))}${k(s.openFlags,t("flg"))}${k(s.pendingVerifications,t("pv"))}</div>
+  <div class="card"><h3 style="margin-top:0">${t("byst")}</h3>${bars(s.byStatus||{},s.reports,x=>t(x))}</div>
+  <div class="card"><h3 style="margin-top:0">${t("act")}</h3>${spark(s.series.reports,t("reports"))}<br>${spark(s.series.users,t("users"))}<br>${spark(s.series.posts,t("posts"))}</div>
+  <div class="card"><h3 style="margin-top:0">${t("topw")}</h3>${bars(Object.fromEntries((s.byWilaya||[]).map(w=>[w.wilaya,w.count])),(s.byWilaya[0]||{}).count)}</div>`};
+views.reports=async el=>{
+  el.innerHTML=`<div class="row">${sel("fs",[["",t("all")],...ST.map(s=>[s,t(s)])],"")}<input id="fq" placeholder="${t("search")}"><button class="btn" id="fg">${t("search")}</button><button class="btn sec" id="fx">${t("export")}</button></div><div id="lst"></div>`;
+  const draw=()=>{const l=$("#lst");l.innerHTML="";const qs=new URLSearchParams();if($("#fs").value)qs.set("status",$("#fs").value);if($("#fq").value)qs.set("q",$("#fq").value);
+    paged(l,"/admin/reports?"+qs,(box,rows,reload)=>box.appendChild(table([[t("ttl"),r=>esc(r.title)],[t("type"),r=>esc(r.type)],[t("wilaya"),r=>esc(r.wilaya)],[t("status"),r=>chip(r.status)],[t("by"),r=>esc(r.anonymous?"—":(r.reporter&&r.reporter.name)||"")],[t("date"),r=>fd(r.createdAt)]],rows,r=>reportModal(r,reload))))};
+  $("#fg").onclick=draw;$("#fx").onclick=()=>run(async()=>{const r=await api("/admin/reports/export.csv",{raw:true});const b=await r.blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="reports.csv";a.click()});draw()};
+function reportModal(r,reload){
+  const m=modal(`<h3 style="margin-top:0">${esc(r.title)}</h3><p>${esc(r.description)}</p><p class="mut">${esc(r.type)} • ${esc(r.wilaya)} ${esc(r.city||"")} • ${fd(r.createdAt)}</p>${(r.evidence||[]).filter(e=>e.type==="IMAGE").map(e=>`<img src="${esc(e.url)}" style="max-width:100%;border-radius:10px;margin:4px 0">`).join("")}<label>${t("status")}</label>${sel("ms",ST.map(s=>[s,t(s)]),r.status)}<label>${t("note")}</label><textarea id="mn">${esc(r.moderatorNote||"")}</textarea><div class="row" style="margin-top:10px"><button class="btn" id="ma">${t("apply")}</button></div>`);
+  m.querySelector("#ma").onclick=()=>run(async()=>{await api("/reports/"+r.id+"/status",{method:"PATCH",body:{status:m.querySelector("#ms").value,note:m.querySelector("#mn").value}});toast(t("saved"));m.remove();reload()})}
+views.users=async el=>{
+  el.innerHTML=`<div class="row"><input id="uq" placeholder="${t("search")}">${sel("uf",[["",t("all")],["role=MODERATOR",t("MODERATOR")],["role=ADMIN",t("ADMIN")],["banned=1",t("banned")],["verified=1",t("verified")]],"")}<button class="btn" id="ug">${t("search")}</button></div><div id="lst"></div>`;
+  const draw=()=>{const l=$("#lst");l.innerHTML="";const q=$("#uq").value;const f=$("#uf").value;
+    paged(l,"/admin/users?"+(q?"q="+encodeURIComponent(q)+"&":"")+f,(box,rows,reload)=>box.appendChild(table([[t("name"),u=>esc(u.name)+(u.verified?" ✔":"")],["@",u=>esc(u.username)],[t("email"),u=>esc(u.email)],[t("role"),u=>esc(t(u.role))],[t("status"),u=>u.banned?`<span class="chip banned">${t("banned")}</span>`:""],[t("date"),u=>fd(u.createdAt)]],rows,u=>userModal(u.id,reload))))};
+  $("#ug").onclick=draw;draw()};
+function userModal(id,reload){
+  run(async()=>{const d=await api("/admin/users/"+id);const u=d.user,c=d.counts;const self=me&&u.id===me.id;
+    const m=modal(`<h3 style="margin-top:0">${esc(u.name)} <span class="mut">@${esc(u.username)}</span></h3><p class="mut">${esc(u.email)} • ${esc(t(u.role))} • ${fd(u.createdAt)}</p>${u.banned?`<p><span class="chip banned">${t("banned")}</span> ${esc(u.bannedReason||"")}</p>`:""}<p>${t("posts")}: ${c.posts} • ${t("reports")}: ${c.reports} • ${t("flags")}: ${c.flags}</p><div class="acts"><button class="btn sm" data-a="verify">${u.verified?t("unverify"):t("verify")}</button>${self?"":`<button class="btn sm red" data-a="ban">${u.banned?t("unban"):t("ban")}</button>`}${isAdmin()&&!self?`<button class="btn sm sec" data-a="role">${t("role")}</button><button class="btn sm sec" data-a="reset">${t("reset")}</button><button class="btn sm red" data-a="del">${t("del")}</button>`:""}</div>`);
+    const patch=async b=>{await api("/admin/users/"+id,{method:"PATCH",body:b});toast(t("saved"));m.remove();reload()};
+    m.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>run(async()=>{const a=b.dataset.a;
+      if(a==="verify")return patch({isVerified:!u.verified});
+      if(a==="ban"){if(u.banned)return patch({banned:false});const r=prompt(t("reason"),"");if(r===null)return;return patch({banned:true,bannedReason:r})}
+      if(a==="role"){const r=prompt("USER / MODERATOR / ADMIN",u.role);if(!r)return;return patch({role:r.trim().toUpperCase()})}
+      if(a==="reset"){if(!confirm(t("confirm")))return;const j=await api("/admin/users/"+id+"/reset-password",{method:"POST",body:{}});alert(t("temp")+": "+j.tempPassword)}
+      if(a==="del"){if(!confirm(t("confirm")))return;await api("/admin/users/"+id,{method:"DELETE"});m.remove();reload()}}))})}
+views.ver=async el=>{
+  el.innerHTML=`<div class="row">${sel("vs",[["PENDING",t("PENDING")],["APPROVED",t("APPROVED")],["REJECTED",t("REJECTED")]],"PENDING")}</div><div id="lst"></div>`;
+  const draw=()=>run(async()=>{const rows=await api("/admin/verification?status="+$("#vs").value);const l=$("#lst");l.innerHTML="";
+    l.appendChild(table([[t("name"),r=>esc(r.user&&r.user.name)],[t("reason"),r=>esc(r.reason)],["",r=>r.documentUrl?`<a href="${esc(r.documentUrl)}" target="_blank" rel="noopener">📎</a>`:""],[t("status"),r=>chip(r.status)],[t("action"),r=>`<div class="acts"><button class="btn sm" data-id="${esc(r.id)}" data-s="APPROVED">${t("approve")}</button><button class="btn sm red" data-id="${esc(r.id)}" data-s="REJECTED">${t("reject")}</button></div>`]],rows));
+    l.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>run(async()=>{let note;if(b.dataset.s==="REJECTED"){note=prompt(t("reason"),"");if(note===null)return}await api("/admin/verification/"+b.dataset.id,{method:"PATCH",body:{status:b.dataset.s,note}});draw()}))});
+  $("#vs").onchange=draw;draw()};
+views.flags=async el=>{
+  el.innerHTML=`<div class="row">${sel("fs",[["OPEN",t("open")],["RESOLVED",t("resolved")],["DISMISSED",t("dismissed")]],"OPEN")}</div><div id="lst"></div>`;
+  const draw=()=>run(async()=>{const rows=await api("/admin/flags?status="+$("#fs").value);const l=$("#lst");l.innerHTML="";
+    l.appendChild(table([[t("type"),f=>esc(f.targetType)],[t("detail"),f=>esc(f.target?f.target.text:"—")],[t("reason"),f=>esc(f.reason)],[t("by"),f=>esc(f.reporter&&f.reporter.name)],[t("action"),f=>f.status!=="OPEN"?chip(f.status):`<div class="acts">${["POST"].includes(f.targetType)?`<button class="btn sm sec" data-id="${esc(f.id)}" data-s="RESOLVED" data-a="HIDE_TARGET">${t("hideT")}</button>`:""}${["POST","COMMENT","LOSTFOUND"].includes(f.targetType)?`<button class="btn sm red" data-id="${esc(f.id)}" data-s="RESOLVED" data-a="DELETE_TARGET">${t("delT")}</button>`:""}<button class="btn sm" data-id="${esc(f.id)}" data-s="RESOLVED">${t("resolve")}</button><button class="btn sm sec" data-id="${esc(f.id)}" data-s="DISMISSED">${t("dismiss")}</button></div>`]],rows));
+    l.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>run(async()=>{await api("/admin/flags/"+b.dataset.id,{method:"PATCH",body:{status:b.dataset.s,action:b.dataset.a}});draw()}))});
+  $("#fs").onchange=draw;draw()};
+views.posts=async el=>{
+  el.innerHTML=`<div class="row"><input id="pq" placeholder="${t("search")}">${sel("ph",[["",t("all")],["1",t("hidden")]],"")}<button class="btn" id="pg">${t("search")}</button></div><div id="lst"></div>`;
+  const draw=()=>{const l=$("#lst");l.innerHTML="";const q=$("#pq").value;
+    paged(l,"/admin/posts?"+(q?"q="+encodeURIComponent(q)+"&":"")+($("#ph").value?"hidden=1":""),(box,rows,reload)=>{box.appendChild(table([[t("by"),p=>esc(p.author&&p.author.name)],[t("desc"),p=>esc((p.title?p.title+" — ":"")+(p.body||"").slice(0,140))+(p.hidden?` <span class="chip banned">${t("hidden")}</span>`:"")],[t("date"),p=>fd(p.createdAt)],[t("action"),p=>`<button class="btn sm sec" data-id="${esc(p.id)}" data-h="${p.hidden?0:1}">${p.hidden?t("unhide"):t("hide")}</button>`]],rows));
+      box.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>run(async()=>{await api("/admin/posts/"+b.dataset.id,{method:"PATCH",body:{hidden:b.dataset.h==="1"}});reload()}))})};
+  $("#pg").onclick=draw;draw()};
+views.bc=async el=>{
+  el.innerHTML=`<div class="card"><label>${t("aud")}</label>${sel("ba",["ALL","WILAYA","USER","STAFF"].map(a=>[a,t("aud"+a)]),"ALL")}<div id="bx"></div><label>${t("ttl")}</label><input id="bt" maxlength="120"><label>${t("msg")}</label><textarea id="bm" maxlength="500"></textarea><div class="row" style="margin-top:10px"><button class="btn" id="bs">${t("send")}</button></div></div><h3>${t("hist")}</h3><div id="bh"></div>`;
+  const ex=()=>{const a=$("#ba").value;$("#bx").innerHTML=a==="WILAYA"?`<label>${t("wilaya")}</label><input id="bw">`:a==="USER"?`<label>${t("userid")}</label><input id="bu">`:""};$("#ba").onchange=ex;ex();
+  const hist=()=>run(async()=>{const h=await api("/admin/broadcasts");$("#bh").innerHTML="";$("#bh").appendChild(table([[t("ttl"),x=>esc(x.title)],[t("aud"),x=>esc(t("aud"+x.audience)+(x.wilaya?": "+x.wilaya:""))],["#",x=>x.sentCount],[t("date"),x=>fd(x.createdAt)]],h))});hist();
+  $("#bs").onclick=()=>run(async()=>{if(!confirm(t("confirm")))return;const a=$("#ba").value;const j=await api("/admin/broadcast",{method:"POST",body:{audience:a,title:$("#bt").value,body:$("#bm").value,wilaya:a==="WILAYA"?$("#bw").value:undefined,userId:a==="USER"?$("#bu").value:undefined}});toast(t("sent")+" "+j.sent);$("#bt").value="";$("#bm").value="";hist()})};
+views.set=async el=>{
+  const s=await api("/admin/settings");const on=k=>s[k]===true||s[k]==="true";
+  const sw=(k,l)=>`<label class="sw"><input type="checkbox" data-k="${k}"${on(k)?" checked":""}> ${esc(t(l))}</label>`;
+  el.innerHTML=`<div class="card">${sw("requireReportReview","req")}${sw("registrationOpen","reg")}${sw("allowAnonymousReports","anon")}${sw("maintenance","maint")}<label>${t("ann")}</label><textarea id="sa" maxlength="500">${esc(s.announcement||"")}</textarea><label>${t("lvl")}</label>${sel("sl",["info","warning","danger"].map(x=>[x,t(x)]),s.announcementLevel||"info")}<label>${t("minv")}</label><input id="sv" value="${esc(s.minAppVersion||"")}" placeholder="2.0.0"><div class="row" style="margin-top:12px"><button class="btn" id="ss">${t("save")}</button></div></div>`;
+  $("#ss").onclick=()=>run(async()=>{const b={announcement:$("#sa").value,announcementLevel:$("#sl").value,minAppVersion:$("#sv").value};el.querySelectorAll("input[data-k]").forEach(i=>b[i.dataset.k]=i.checked);await api("/admin/settings",{method:"PUT",body:b});toast(t("saved"))})};
+views.audit=async el=>{
+  const rows=await api("/admin/audit");
+  el.appendChild(table([[t("date"),r=>fd(r.createdAt)],[t("actor"),r=>esc(r.actorName||r.actorId)],[t("action"),r=>esc(r.action)],[t("type"),r=>esc(r.targetType)],[t("detail"),r=>esc(r.detail)]],rows))};
+if(token)run(async()=>{const j=await api("/me");const u=j.user||j;if(!["ADMIN","MODERATOR"].includes(u.role))throw new Error(t("denied"));me=u;render()}).then(()=>{if(!me){token=null;ls("token",null);render()}});else render();
+</script>
+</body>
+</html>

@@ -59,6 +59,7 @@ model User {
   followers       Follow[]             @relation("followers")
   blockedBy       Block[]              @relation("blocked")
   blocks          Block[]              @relation("blocks")
+  devices         DeviceToken[]
 }
 
 model Follow {
@@ -81,6 +82,7 @@ model Post {
   longitude   Float?
   mediaUrl    String?
   mediaType   MediaType?
+  hidden      Boolean   @default(false)
   createdAt   DateTime  @default(now())
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   likes       Like[]
@@ -172,6 +174,7 @@ model LostFound {
   longitude   Float?
   imageUrl    String?
   contactHint String?
+  status      String      @default("OPEN")
   createdAt   DateTime    @default(now())
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -201,6 +204,7 @@ model Message {
   senderId       String
   body           String?
   mediaUrl       String?
+  mediaType      String?
   createdAt      DateTime     @default(now())
   readAt         DateTime?
   conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -224,9 +228,12 @@ model Notification {
   userId    String
   title     String?
   body      String?
+  type      String?
+  data      Json?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
 }
 
 model SawtAljazairProfile {
@@ -234,7 +241,83 @@ model SawtAljazairProfile {
   userId      String   @unique
   displayName String?
   wilaya      String?
+  language    String?
+  banned      Boolean  @default(false)
+  bannedReason String?
+  lastSeenAt  DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   @@map("SawtAljazairProfile")
+}
+
+// ---- v2.0 additive models (no existing table is altered destructively) ----
+
+model Media {
+  id        String   @id
+  mime      String
+  size      Int
+  data      Bytes
+  ownerId   String?
+  createdAt DateTime @default(now())
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Flag {
+  id         String   @id @default(cuid())
+  reporterId String
+  targetType String
+  targetId   String
+  reason     String?
+  status     String   @default("OPEN")
+  note       String?
+  handledBy  String?
+  createdAt  DateTime @default(now())
+  @@index([status, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  actorName String?
+  action    String
+  targetType String?
+  targetId  String?
+  detail    String?
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Broadcast {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  audience  String
+  wilaya    String?
+  sentCount Int      @default(0)
+  createdBy String
+  createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([userId])
 }

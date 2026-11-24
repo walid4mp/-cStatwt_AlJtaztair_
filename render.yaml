@@ -6,8 +6,22 @@ services:
     buildCommand: npm install --no-audit --no-fund && npx prisma generate
     startCommand: npm run start
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: JWT_SECRET
         generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DEDICATED_DATABASE
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ADMIN_SEED_EMAIL
+        sync: false
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
+      - key: STORAGE_MODE
+        value: auto
       - key: CORS_ORIGIN
         value: "*"
       - key: PUBLIC_BASE_URL

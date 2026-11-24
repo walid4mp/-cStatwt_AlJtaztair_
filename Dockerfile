@@ -10,6 +10,7 @@ COPY backend/prisma ./prisma
 RUN npm install --no-audit --no-fund
 
 COPY backend/src ./src
+COPY backend/public ./public
 ENV NODE_ENV=production
 EXPOSE 10000
 CMD ["npm", "start"]

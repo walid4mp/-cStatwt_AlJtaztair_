@@ -1,7 +1,7 @@
 name: sawt_aljazair
 description: صوت الجزائر - منصة مدنية للإبلاغ والمشاركة المجتمعية.
 publish_to: "none"
-version: 1.5.5+20
+version: 2.0.0+27
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -9,7 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
+  http_parser: ^4.0.2
   http: ^1.2.2
   shared_preferences: ^2.3.3
   image_picker: ^1.1.2
@@ -30,3 +33,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/app_poster.png
+    - assets/branding/app_icon.png

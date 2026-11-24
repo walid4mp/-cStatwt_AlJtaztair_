@@ -1,84 +1,39 @@
-# صوت الجزائر | Sawt AlJazair — V1.3
+# صوت الجزائر | Voix d'Algérie | Sawt Aljazair — v2.0.0
 
-نسخة V1.3 كاملة وموسعة من التطبيق المدني/الاجتماعي الجزائري.
+تطبيق مدني اجتماعي: بلاغات + منشورات + خريطة حقيقية + محادثات لحظية + مفقودات + إشعارات + نظام إدارة كامل.
+Flutter (Android) + Node/Express/Prisma/PostgreSQL. اللغات: العربية (RTL) / Français / English.
 
-## ما الجديد في V1.3
-- واجهة جديدة مستوحاة من هوية الصورة الترويجية: أخضر/أبيض/أحمر، بطاقات زجاجية خفيفة، خرائط، درع ومؤشرات أمان.
-- جميع الولايات الجزائرية الـ58 في الاختيار والفلترة.
-- منشورات + صور + فيديوهات + إعجاب + حفظ + تعليق + إعادة نشر.
-- إنشاء بلاغات متقدمة مع صور/فيديو، موقع، ولاية، حالة البلاغ، وإمكانية الإخفاء عن الملف العام.
-- خريطة البلاغات التفاعلية مع علامات ومعلومات مختصرة.
-- بحث متقدم في البلاغات حسب النص والولاية والنوع والحالة.
-- نظام الأدلة Evidence للبلاغات.
-- نظام المفقودات/المعثورات مع مطابقة تقريبية حسب الفئة والولاية.
-- طلب توثيق للحسابات + مراجعة للمشرف.
-- محادثات كاملة REST + Socket.IO مع حالة القراءة والكتم والحظر والإبلاغ عن المحادثة.
-- لوحة إدارة للمشرفين لمراجعة البلاغات وطلبات التوثيق.
-- تخزين وسائط S3/R2 اختياري في الإنتاج، مع fallback محلي للتطوير.
-- حماية الخصوصية: الإبلاغ المجهول، إخفاء الإحداثيات الدقيقة في العرض العام، وعدم تقديم اتهام كمعلومة مؤكدة.
-- GitHub Actions لبناء APK.
-- Render Blueprint لـ API + PostgreSQL.
+## ما الجديد في 2.0.0
+- **إصلاح رفع الصور والفيديو**: الجذر كان أن Flutter يرسل `application/octet-stream`؛ الآن العميل يحدد النوع والخادم يتحقق من محتوى الملف (magic bytes). التخزين: `STORAGE_MODE=db` (افتراضي، يعمل بلا إعداد إضافي)، أو `s3` (Cloudflare R2)، أو `local`.
+- **المحادثات**: بدء محادثة من ملف أي مستخدم، صور/فيديو، مؤشر الكتابة، إيصالات القراءة، كتم/حظر/إبلاغ، حذف رسالة، دفع لحظي Socket.IO.
+- **الملف الشخصي**: تعديل الصورة والاسم والنبذة والولاية والهاتف/واتساب، متابعة، صفحة مستخدم، بحث أشخاص، تغيير كلمة المرور، حذف الحساب.
+- **خريطة حقيقية**: OpenStreetMap + قمر صناعي + تضاريس، تجميع العلامات، فلاتر، بحث أماكن، موقعي، اختيار موقع بالدبوس، فتح في تطبيق الخرائط، إحداثيات تقريبية للعامة.
+- **الإشعارات**: داخل التطبيق + نظام (قناة Android أصلية) + Socket.IO + FCM اختياري، وفتح الشاشة المناسبة عند الضغط.
+- **الإدارة**: داخل التطبيق (مركز الإدارة) **ولوحة ويب** على `/panel`: مؤشرات، بلاغات (تغيير حالة + ملاحظة + CSV)، مستخدمون (حظر/توثيق/صلاحيات/إعادة كلمة مرور/حذف)، توثيق، شكاوى المحتوى، إخفاء منشورات، بث إشعارات (الكل/ولاية/مستخدم/الإدارة)، إعدادات النظام (صيانة، مراجعة البلاغات قبل النشر، فتح التسجيل، إعلان علوي، أدنى إصدار)، سجل العمليات.
+- استعادة كلمة المرور برمز عبر البريد (SMTP).
 
-## تشغيل Flutter
+## إعداد المدير الأول (على Render → Environment)
+- `ADMIN_EMAILS=you@example.com` يرفع هذا الحساب (بعد تسجيله) إلى ADMIN عند تشغيل الخادم، **أو**
+- `ADMIN_SEED_EMAIL` + `ADMIN_SEED_PASSWORD` لإنشاء مدير تلقائيًا.
+ثم افتح `https://<your-api>/panel`.
+
+## متغيرات البيئة المهمة
+`DATABASE_URL`, `JWT_SECRET`, `DEDICATED_DATABASE=true` (لتشغيل `prisma db push` تلقائيًا), `STORAGE_MODE=db|s3|local`,
+`S3_*` (عند s3), `SMTP_HOST/PORT/USER/PASS/FROM` (استعادة كلمة المرور), `ADMIN_EMAILS`, `ADMIN_SEED_*`.
+راجع `backend/.env.example`.
+
+## التشغيل
 ```bash
+# Backend
+cd backend && cp .env.example .env && npm install && npx prisma db push && npm start
+# Flutter
 flutter pub get
 flutter run --dart-define=API_URL=http://10.0.2.2:4000
 ```
+البناء عبر GitHub Actions (`.github/workflows/flutter.yml`) ينتج APK و AAB.
 
-## تشغيل Backend
-```bash
-cd backend
-npm install
-cp .env.example .env
-npx prisma generate
-npx prisma db push
-npm run dev
-```
+## إشعارات الدفع والتطبيق مغلق (FCM) — اختياري
+تعمل الإشعارات اللحظية والنظامية والتطبيق مفتوح/في الخلفية القريبة. للدفع والتطبيق مغلق تمامًا: أنشئ مشروع Firebase، أضف `FIREBASE_SERVICE_ACCOUNT` (JSON) للخادم و`npm i firebase-admin`، وأضف `google-services.json` وحزمة `firebase_messaging` للتطبيق. الخادم جاهز (`/me/devices`).
 
-## نشر Backend على Render عبر Docker
-
-يوجد `Dockerfile` في جذر المشروع لأن خدمة Render الحالية تستخدم إعداد Docker. يبني الـ Dockerfile مجلد `backend` ويشغّل `npm start` مع منفذ Render عبر `PORT`.
-
-إذا كانت خدمة Render مضبوطة على Docker، لا تحتاج إلى نقل Dockerfile إلى `backend`. أما `render.yaml` فهو Blueprint اختياري لإنشاء خدمة Node + PostgreSQL جديدة.
-
-## متغيرات الإنتاج
-- `DATABASE_URL`
-- `JWT_SECRET`
-- `CORS_ORIGIN`
-- `PORT`
-- `PUBLIC_BASE_URL`
-- `S3_PUBLIC_BASE_URL` (مطلوب عند استخدام R2/S3 إذا كانت الملفات ستُعرض مباشرة)
-- `S3_ENDPOINT` (اختياري لـ Cloudflare R2 أو أي S3-compatible)
-- `S3_BUCKET`
-- `S3_REGION`
-- `S3_ACCESS_KEY`
-- `S3_SECRET_KEY`
-
-إذا لم تُضبط متغيرات S3، يستخدم الخادم مجلد `uploads/` للتطوير فقط.
-على Render، التخزين المحلي ليس دائمًا، لذلك يجب استخدام R2/S3 قبل إطلاق نسخة إنتاج.
-
-## ملاحظة مهمة عن البلاغات
-البلاغ هو محتوى مقدم من مستخدم ويحتاج مراجعة. التطبيق لا يصف شخصًا بأنه "مجرم" أو "سارق" لمجرد ورود بلاغ بحقه. الحالات الرسمية للمراجعة منفصلة عن ادعاء المستخدم.
-
-## الصورة الترويجية
-تم وضع الصورة المطلوبة داخل:
-`assets/branding/app_poster.png`
-وتظهر في صفحة التعريف/الترحيب داخل التطبيق.
-
-## API
-انظر `docs/V1.3.md`.
-
-
-## إنتاج Render
-رابط API الإنتاج الحالي: `https://cstatwt-aljtaztair.onrender.com`
-
-مهم: إذا كانت خدمة Render تعمل عبر Docker فسيستخدم `Dockerfile` الموجود في الجذر. يبدأ الخادم بعد مزامنة Prisma مع قاعدة البيانات (`prisma db push --skip-generate`). يجب أن تكون `DATABASE_URL` و`JWT_SECRET` موجودتين في Render.
-
-إذا كانت خدمة التخزين R2/S3 مفعلة، اضبط `S3_PUBLIC_BASE_URL` على نطاق الملفات العام؛ لا تستخدم رابط S3 الداخلي كعنوان صورة في التطبيق.
-
-## V1.4.5 shared database safety
-This version does not execute `prisma db push` at startup. It is intended for a PostgreSQL database shared with another application. See `docs/SHARED_DATABASE_SAFE_MIGRATION.md`.
-
-
-## V1.4.5.0
-Shared PostgreSQL compatibility release. Startup performs only an additive nullable migration and never resets the shared database.
+## ملاحظة صريحة عن التحقق
+بيئة العمل لم تتضمن Flutter SDK ولا شبكة، لذلك: الخادم فُحص بـ `node --check`/ESLint ومحمّل تجريبي، ولوحة الويب اختُبرت بـ Playwright مع خادم وهمي، أما كود Flutter فمراجَع يدويًا ولم يُترجَم (compile). شغّل `flutter analyze` أولًا؛ أي خطأ نادر سيظهر هناك مباشرة (CI مضبوط بـ `--no-fatal-infos`).
