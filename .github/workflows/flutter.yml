@@ -23,10 +23,10 @@ jobs:
 
       # The repository archive is missing gradle-wrapper.jar. Provision Gradle
       # directly, then regenerate the wrapper from the configured distribution.
-      - name: Set up Gradle 8.14
+      - name: Set up Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.14'
+          gradle-version: '9.3.1'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -39,15 +39,23 @@ jobs:
           java -version
           gradle --version
           flutter --version
-          flutter doctor -v || true
-          mkdir -p android
           printf 'flutter.sdk=%s\nsdk.dir=%s\n' "$FLUTTER_ROOT" "$ANDROID_HOME" > android/local.properties
-          cd android
-          gradle wrapper --gradle-version 8.14 --distribution-type bin
-          chmod +x gradlew
-          test -s gradle/wrapper/gradle-wrapper.jar
-          bash ./gradlew --version
-          cd ..
+          # Generate the wrapper jar in an empty directory so the Flutter Gradle
+          # plugin check never runs against an incompatible Gradle.
+          tmp="$(mktemp -d)"
+          (cd "$tmp" && gradle wrapper --gradle-version 9.3.1 --distribution-type bin)
+          mkdir -p android/gradle/wrapper
+          cp "$tmp/gradle/wrapper/gradle-wrapper.jar" android/gradle/wrapper/gradle-wrapper.jar
+          chmod +x android/gradlew
+          grep distributionUrl android/gradle/wrapper/gradle-wrapper.properties
+          test -s android/gradle/wrapper/gradle-wrapper.jar
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: pub-${{ runner.os }}-
 
       - name: Install Flutter dependencies
         run: flutter pub get
@@ -61,10 +69,20 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
 
       - name: Build release APK
-        run: flutter build apk --release --dart-define=API_URL="$API_URL"
+        run: |
+          for i in 1 2 3; do
+            flutter build apk --release --dart-define=API_URL="$API_URL" && exit 0
+            echo "Build attempt $i failed (possibly Maven 429); retrying in 60s"; sleep 60
+          done
+          exit 1
 
       - name: Build release App Bundle
-        run: flutter build appbundle --release --dart-define=API_URL="$API_URL"
+        run: |
+          for i in 1 2 3; do
+            flutter build appbundle --release --dart-define=API_URL="$API_URL" && exit 0
+            echo "Build attempt $i failed (possibly Maven 429); retrying in 60s"; sleep 60
+          done
+          exit 1
 
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
